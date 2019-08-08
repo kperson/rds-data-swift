@@ -1,109 +1,125 @@
 //
-//  BeginTransaction.swift
+//  AutoCommit.swift
 //  AWSSDKSwiftCore
 //
-//  Created by Kelton Person on 8/5/19.
+//  Created by Kelton Person on 8/7/19.
 //
 
 import Foundation
-import AWSSDKSwiftCore
 import NIO
 
-
-public extension RDSDataClient {
-
-    func beginTransaction(schema: String? = nil) throws -> EventLoopFuture<String> {
-        let input = CreateTransactionInput(
-            database: database,
-            resourceArn: resourceArn,
-            schema: schema,
-            secretArn: secretArn
-        )
-        let output: EventLoopFuture<CreateTransactionOutput> = try client.send(
-            operation: "",
-            path: "/BeginTransaction",
-            httpMethod: "POST",
-            input: input
-        )
-        return output.map { $0.transactionId }
+public class Transaction {
+    
+    let transactionId: String
+    let client: RDSDataClient
+    
+    public init(transactionId: String, client: RDSDataClient) {
+        self.transactionId = transactionId
+        self.client = client
     }
     
-    func commit(transactionId: String) throws -> EventLoopFuture<Void> {
-        let input = TransactionInput(
-            resourceArn: resourceArn,
-            secretArn: secretArn,
-            transactionId: transactionId
-        )
-        let output: EventLoopFuture<TransactionOutput> = try client.send(
-            operation: "",
-            path: "/CommitTransaction",
-            httpMethod: "POST",
-            input: input
-        )
-        return output.map { _ in Void() }
+    public func executeStatement(
+        sql: String,
+        params: [String : Field] = [:],
+        continueAfterTimeout: Bool = true,
+        schema: String? = nil
+    ) -> EventLoopFuture<ExecuteStatementOutput> {
+        do {
+            return try client.executeStatement(
+                sql: sql,
+                params: params,
+                transactionId: transactionId,
+                continueAfterTimeout: continueAfterTimeout,
+                schema: schema
+            )
+        }
+        catch let error {
+            let failed: EventLoopFuture<ExecuteStatementOutput> = client.errorEventLoopGroup.next().newFailedFuture(error: error)
+            return failed
+        }
     }
     
-    func rollback(transactionId: String) throws -> EventLoopFuture<Void> {
-        let input = TransactionInput(
-            resourceArn: resourceArn,
-            secretArn: secretArn,
-            transactionId: transactionId
-        )
-        let output: EventLoopFuture<TransactionOutput> = try client.send(
-            operation: "",
-            path: "/RollbackTransaction",
-            httpMethod: "POST",
-            input: input
-        )
-        return output.map { _ in Void() }
+    public func batchExecuteStatement(
+        sql: String,
+        paramsSet: [[String : Field]],
+        schema: String? = nil
+    ) -> EventLoopFuture<BatchExecuteStatementOutput> {
+        do {
+            return try client.batchExecuteStatement(
+                sql: sql,
+                paramsSet: paramsSet,
+                transactionId: transactionId,
+                schema: schema
+            )
+        }
+        catch let error {
+            let failed: EventLoopFuture<BatchExecuteStatementOutput> = client.errorEventLoopGroup.next().newFailedFuture(error: error)
+            return failed
+        }
     }
-
+    
+    public func commit() -> EventLoopFuture<Void> {
+        do {
+            return try client.commit(transactionId: transactionId)
+        }
+        catch let error {
+            let failed: EventLoopFuture<Void> = client.errorEventLoopGroup.next().newFailedFuture(error: error)
+            return failed
+        }
+    }
+    
+    public func rollback() -> EventLoopFuture<Void> {
+        do {
+            return try client.rollback(transactionId: transactionId)
+        }
+        catch let error {
+            let failed: EventLoopFuture<Void> = client.errorEventLoopGroup.next().newFailedFuture(error: error)
+            return failed
+        }
+    }
+    
+    public func rollbackFromError<T>(error: Error) -> EventLoopFuture<T> {
+        return rollback().then { _ in
+            let errorFuture: EventLoopFuture<T> = self.client.errorEventLoopGroup.next().newFailedFuture(error: error)
+            return errorFuture
+        }
+    }
 }
 
 
-public struct CreateTransactionInput: AWSShape {
+extension RDSDataClient {
     
-    public let database: String
-    public let resourceArn: String
-    public let schema: String?
-    public let secretArn: String
+    public func autoCommit<T>(
+        schema: String? = nil,
+        _ f: @escaping (Transaction) throws -> EventLoopFuture<T>
+    ) -> EventLoopFuture<T> {
+        return beginTransaction(schema: schema).then { tx in
+            do {
+                return try f(tx)
+                .then { val -> EventLoopFuture<T> in
+                    return tx.commit().map { _ in val }
+                }.thenIfError { error in
+                    let failed: EventLoopFuture<T> = tx.rollbackFromError(error: error)
+                    return failed
+                }
+            }
+            catch let error {
+                let failed: EventLoopFuture<T> = tx.rollbackFromError(error: error)
+                return failed
+            }
+        }
+    }
     
-    public static var _members: [AWSShapeMember] = [
-        AWSShapeMember(label: "database", required: true, type: .string),
-        AWSShapeMember(label: "resourceArn", required: true, type: .string),
-        AWSShapeMember(label: "secretArn", required: true, type: .string),
-        AWSShapeMember(label: "schema", required: false, type: .string)
-    ]
-}
-
-
-public struct CreateTransactionOutput: AWSShape {
+    public func beginTransaction(schema: String?) -> EventLoopFuture<Transaction> {
+        do {
+            return try createTransaction(schema: schema).map { transactionId in
+                return Transaction(transactionId: transactionId, client: self)
+            }
+        }
+        catch let error {
+            let failed: EventLoopFuture<Transaction> = errorEventLoopGroup.next().newFailedFuture(error: error)
+            return failed
+        }
+    }
     
-    public let transactionId: String
-    
-    public static var _members: [AWSShapeMember] = [
-        AWSShapeMember(label: "transactionId", required: true, type: .string)
-    ]
-}
-
-public struct TransactionOutput: AWSShape {
-    
-    public let transactionStatus: String
-    
-    public static var _members: [AWSShapeMember] = [
-        AWSShapeMember(label: "transactionStatus", required: true, type: .string)
-    ]
-}
-
-public struct TransactionInput: AWSShape {
-    
-    public let resourceArn: String
-    public let secretArn: String
-    public let transactionId: String
-    
-    public static var _members: [AWSShapeMember] = [
-        AWSShapeMember(label: "resourceArn", required: true, type: .string),
-        AWSShapeMember(label: "secretArn", required: true, type: .string),
-        AWSShapeMember(label: "transactionId", required: true, type: .string)
-    ]
 }

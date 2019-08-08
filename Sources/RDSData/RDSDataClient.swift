@@ -6,14 +6,17 @@
 //
 
 import AWSSDKSwiftCore
+import NIO
 
 
 public class RDSDataClient {
     
-    let client: AWSClient
-    let resourceArn: String
-    let database: String
-    let secretArn: String
+    public let client: AWSClient
+    public let resourceArn: String
+    public let database: String
+    public let secretArn: String
+    
+    public let errorEventLoopGroup: EventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
     
     public init(
         secretArn: String,

@@ -178,7 +178,7 @@ public struct SqlParameter: Codable {
 }
 
 
-struct ExecuteStatementInput: AWSShape {
+public struct ExecuteStatementInput: AWSShape {
     
     public static var _members: [AWSShapeMember] = [
         AWSShapeMember(label: "continueAfterTimeout", required: true, type: .boolean),
@@ -192,15 +192,15 @@ struct ExecuteStatementInput: AWSShape {
         AWSShapeMember(label: "transactionId", required: false, type: .string)
     ]
     
-    let continueAfterTimeout: Bool
-    let database: String
-    let includeResultMetadata: Bool
-    let parameters: [SqlParameter]
-    let resourceArn: String
-    let schema: String?
-    let secretArn: String
-    let sql: String
-    let transactionId: String?
+    public let continueAfterTimeout: Bool
+    public let database: String
+    public let includeResultMetadata: Bool
+    public let parameters: [SqlParameter]
+    public let resourceArn: String
+    public let schema: String?
+    public let secretArn: String
+    public let sql: String
+    public let transactionId: String?
     
 }
 
@@ -216,21 +216,21 @@ public extension Dictionary where Key == String, Value == Field {
     
 }
 
-public struct ExecuteStatementOutputRaw: AWSShape {
+struct ExecuteStatementOutputRaw: AWSShape {
     
-    public static var _members: [AWSShapeMember] = [
+    static var _members: [AWSShapeMember] = [
         AWSShapeMember(label: "columnMetadata", required: false, type: .list),
         AWSShapeMember(label: "generatedFields", required: false, type: .list),
         AWSShapeMember(label: "records", required: false, type: .list),
         AWSShapeMember(label: "numberOfRecordsUpdated", required: true, type: .long)
     ]
     
-    public let columnMetadata: [ColumnMetadata]?
-    public let generatedFields: [Field]?
-    public let records: [[Field]]?
-    public let numberOfRecordsUpdated: Int64?
+    let columnMetadata: [ColumnMetadata]?
+    let generatedFields: [Field]?
+    let records: [[Field]]?
+    let numberOfRecordsUpdated: Int64?
     
-    public var clean: ExecuteStatementOutput {
+    var clean: ExecuteStatementOutput {
         return ExecuteStatementOutput(
             columnMetadata: columnMetadata ?? [],
             generatedFields: generatedFields ?? [],
@@ -247,7 +247,7 @@ public struct Row {
     let names: [String : Int]
     
     public subscript(string: String) -> Field? {
-        if let int = names[string] {
+        if let int = names[string.lowercased()] {
             let field = records[int]
             return field
         }
@@ -256,9 +256,9 @@ public struct Row {
         }
     }
     
-    public subscript(int: Int) -> Field? {
-        return records[int]
-    }
+//    public subscript(int: Int) -> Field? {
+//        return records[int]
+//    }
     
 }
 
@@ -288,7 +288,7 @@ public struct ExecuteStatementOutput: Sequence, IteratorProtocol {
         var nameDict: [String : Int] = [:]
         var i = 0
         for n in columnMetadata {
-            if let name = n.name {
+            if let name = n.name?.lowercased() {
                 nameDict[name] = i
             }
             i = i + 1
@@ -332,7 +332,7 @@ public struct ColumnMetadata: Codable {
 }
 
 
-struct BatchExecuteStatementInput: AWSShape {
+public struct BatchExecuteStatementInput: AWSShape {
     
     public static var _members: [AWSShapeMember] = [
         AWSShapeMember(label: "database", required: true, type: .string),
@@ -344,13 +344,13 @@ struct BatchExecuteStatementInput: AWSShape {
         AWSShapeMember(label: "transactionId", required: false, type: .string)
     ]
     
-    let database: String
-    let parameterSets: [[SqlParameter]]
-    let resourceArn: String
-    let schema: String?
-    let secretArn: String
-    let sql: String
-    let transactionId: String?
+    public let database: String
+    public let parameterSets: [[SqlParameter]]
+    public let resourceArn: String
+    public let schema: String?
+    public let secretArn: String
+    public let sql: String
+    public let transactionId: String?
     
 }
 
@@ -360,19 +360,19 @@ public struct GeneratedFields: Codable {
     
 }
 
-public struct GeneratedFieldsRaw: Codable {
+struct GeneratedFieldsRaw: Codable {
     
-    public let generatedFields: [Field]?
+    let generatedFields: [Field]?
     
 }
 
-public struct BatchExecuteStatementOutputRaw: AWSShape {
+struct BatchExecuteStatementOutputRaw: AWSShape {
     
-    public static var _members: [AWSShapeMember] = []
+    static var _members: [AWSShapeMember] = []
     
-    public let updateResults: [GeneratedFieldsRaw]?
+    let updateResults: [GeneratedFieldsRaw]?
     
-    public var clean: BatchExecuteStatementOutput {
+    var clean: BatchExecuteStatementOutput {
         let rs = updateResults ?? []
         let fields = rs.map { GeneratedFields(generatedFields: $0.generatedFields ?? []) }
         return BatchExecuteStatementOutput(updateResults: fields)
