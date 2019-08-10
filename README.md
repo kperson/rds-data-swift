@@ -1,10 +1,17 @@
+# Swift RDS Data Client 
+
+A RDS data client for swift.
+
+## Example
+
+```swift
 import RDSData
 
 let client = RDSDataClient(
     secretArn: "arn:aws:secretsmanager:us-east-1:193125195061:secret:/db/data_api/kelton_test-oansumgril-MTS2M3",
     resourceArn: "arn:aws:rds:us-east-1:193125195061:cluster:tf-20190809173315221100000001",
     database: "kelton_test",
-    retryOnSleep: true
+    retryOnSleep: false
 )
 
 
@@ -57,3 +64,15 @@ let firstNamesFut = client.autoCommit { tx in
 
 let firstNames = try firstNamesFut.wait()
 print(firstNames)
+
+```
+
+## Swift Package
+Add the following to your `Package.swift` file.
+```swift
+.package(url: "https://github.com/kperson/rds-data-swift.git", .upToNextMinor(from: "1.0.0"))
+```
+
+## retryOnSleep
+
+If using MySQL serverless, you may want to set `retryOnSleep` to `true` in the `RDSDataClient` initializer.  This will retry the statement if a sleep error occurs.
