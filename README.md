@@ -8,9 +8,9 @@ A RDS data client for swift.
 import RDSData
 
 let client = RDSDataClient(
-    secretArn: "arn:aws:secretsmanager:us-east-1:193125195061:secret:/db/data_api/kelton_test-oansumgril-MTS2M3",
-    resourceArn: "arn:aws:rds:us-east-1:193125195061:cluster:tf-20190809173315221100000001",
-    database: "kelton_test",
+    secretArn: "<SECRET_ARN>",
+    resourceArn: "<RESOURCE_ARN>",
+    database: "<DB_NAME>",
     retryOnSleep: false
 )
 
