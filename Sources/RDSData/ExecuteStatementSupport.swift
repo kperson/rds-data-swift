@@ -30,10 +30,8 @@ public extension RDSDataClient {
             sql: sql,
             transactionId: transactionId
         )
-        let output: EventLoopFuture<ExecuteStatementOutputRaw> = try client.send(
-            operation: "",
+        let output: EventLoopFuture<ExecuteStatementOutputRaw> = try send(
             path: "/Execute",
-            httpMethod: "POST",
             input: input
         )
         return output.map { $0.clean }
@@ -54,10 +52,8 @@ public extension RDSDataClient {
             sql: sql,
             transactionId: transactionId
         )
-        let output: EventLoopFuture<BatchExecuteStatementOutputRaw> = try client.send(
-            operation: "",
+        let output: EventLoopFuture<BatchExecuteStatementOutputRaw> = try send(
             path: "/BatchExecute",
-            httpMethod: "POST",
             input: input
         )
         return output.map { $0.clean }

@@ -19,10 +19,8 @@ public extension RDSDataClient {
             schema: schema,
             secretArn: secretArn
         )
-        let output: EventLoopFuture<CreateTransactionOutput> = try client.send(
-            operation: "",
+        let output: EventLoopFuture<CreateTransactionOutput> = try send(
             path: "/BeginTransaction",
-            httpMethod: "POST",
             input: input
         )
         return output.map { $0.transactionId }
@@ -34,10 +32,8 @@ public extension RDSDataClient {
             secretArn: secretArn,
             transactionId: transactionId
         )
-        let output: EventLoopFuture<TransactionOutput> = try client.send(
-            operation: "",
+        let output: EventLoopFuture<TransactionOutput> = try send(
             path: "/CommitTransaction",
-            httpMethod: "POST",
             input: input
         )
         return output.map { _ in Void() }
@@ -49,10 +45,8 @@ public extension RDSDataClient {
             secretArn: secretArn,
             transactionId: transactionId
         )
-        let output: EventLoopFuture<TransactionOutput> = try client.send(
-            operation: "",
+        let output: EventLoopFuture<TransactionOutput> = try send(
             path: "/RollbackTransaction",
-            httpMethod: "POST",
             input: input
         )
         return output.map { _ in Void() }
