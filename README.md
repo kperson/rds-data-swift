@@ -72,6 +72,7 @@ Add the following to your `Package.swift` file.
 ```swift
 .package(url: "https://github.com/kperson/rds-data-swift.git", .upToNextMinor(from: "1.0.0"))
 ```
+The dependency name is `RDSData`.
 
 ## retryOnSleep
 
