@@ -2,30 +2,39 @@
   "object": {
     "pins": [
       {
+        "package": "AWSSDKSwift",
+        "repositoryURL": "https://github.com/swift-aws/aws-sdk-swift.git",
+        "state": {
+          "branch": null,
+          "revision": "ee943f730d46b310f1faf4cea3a5c6982449f288",
+          "version": "3.5.1"
+        }
+      },
+      {
         "package": "AWSSDKSwiftCore",
         "repositoryURL": "https://github.com/swift-aws/aws-sdk-swift-core.git",
         "state": {
           "branch": null,
-          "revision": "80cc521d5e3f42242f10d9d0fe268cf003a3badb",
-          "version": "3.1.1"
+          "revision": "10b174af7f5c635c13638c2806c8fb2fdc7f86dd",
+          "version": "3.5.2"
         }
       },
       {
         "package": "HypertextApplicationLanguage",
-        "repositoryURL": "https://github.com/Yasumoto/HypertextApplicationLanguage.git",
+        "repositoryURL": "https://github.com/swift-aws/HypertextApplicationLanguage.git",
         "state": {
           "branch": null,
-          "revision": "2302002502fe573494577cc6e8df686e385519f8",
-          "version": "1.1.0"
+          "revision": "aa2c9141d491682f17b2310aed17b9adfc006256",
+          "version": "1.1.1"
         }
       },
       {
         "package": "INIParser",
-        "repositoryURL": "https://github.com/PerfectlySoft/Perfect-INIParser.git",
+        "repositoryURL": "https://github.com/swift-aws/Perfect-INIParser.git",
         "state": {
           "branch": null,
-          "revision": "0952aac9ca54324ff25191569fd9c48eec424772",
-          "version": "3.0.2"
+          "revision": "42de0efc7a01105e19b80d533d3d282a98277f6c",
+          "version": "3.0.3"
         }
       },
       {
@@ -33,8 +42,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "ba7970fe396e8198b84c6c1b44b38a1d4e2eb6bd",
-          "version": "1.14.1"
+          "revision": "8da5c5a4e6c5084c296b9f39dc54f00be146e0fa",
+          "version": "1.14.2"
         }
       },
       {

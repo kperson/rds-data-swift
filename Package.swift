@@ -7,13 +7,13 @@ let package = Package(
         .library(name: "RDSData", targets: ["RDSData"])
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-aws/aws-sdk-swift-core.git", .upToNextMinor(from: "3.1.0"))
+        .package(url: "https://github.com/swift-aws/aws-sdk-swift.git", .upToNextMinor(from: "3.5.1"))
     ],
     targets: [
         .target(
             name: "RDSData",
             dependencies: [
-                "AWSSDKSwiftCore"
+                "RDSDataService"
             ]
         ),
         .testTarget(
